@@ -22,7 +22,8 @@ npm run dev        # http://localhost:5173
 
 - Type into the terminal. Everything is simulated in the browser: no real git, no real network.
 - `task` shows your ticket, `hint` gives a nudge (it's noted in your performance review), `help` lists commands.
-- Move the mouse to the left edge (or press **F2**) to look at Pingr. **F3** leans back. **Esc** opens the menu.
+- Move the mouse to the left edge (or press **F2**) to look at Pingr. **F3** leans back. Pressing the same key or
+  button again returns to the terminal, and clicking a monitor looks at it. **Esc** opens the menu.
 - Settings has Low / Medium / High graphics and a **Flat 2D** mode that skips the 3D office.
 
 A physical keyboard is strongly recommended. Vim is not installed. (There was an incident.)
