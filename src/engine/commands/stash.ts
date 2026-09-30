@@ -79,8 +79,8 @@ function push(ctx: GitContext, repo: Repository, a: Args): number {
   }
   const title = msg ? `On ${repo.currentBranch() ?? '(no branch)'}: ${msg}` : `WIP on ${desc}`;
   const W = repo.makeCommit(repo.writeTree(wtFiles), parents, title);
+  // repo.stash plays the role of git's refs/stash reflog: dropping an entry really forgets it.
   repo.stash.unshift(W);
-  repo.appendReflog('refs/stash', repo.stash[1] ?? '0'.repeat(40), W, title);
 
   // Clean up: put stashed paths back to HEAD (keeping the index if asked).
   for (const p of new Set([...headFiles.keys(), ...repo.index.keys(), ...wtFiles.keys()])) {

@@ -236,6 +236,19 @@ async function prCommand(ctx: GitContext, sh: Shell, sub: string, argv: string[]
       void sh;
       return 0;
     }
+    case 'edit': {
+      const a = new Args(argv, ['-t', '--title', '-b', '--body', '-B', '--base']);
+      const pr = findPr(host, ctx, a.rest[0]);
+      const title = a.value('-t', '--title');
+      const body = a.value('-b', '--body');
+      if (!title && body === undefined && !a.value('-B', '--base')) throw new GhError(['nothing to edit: pass --title, --body or --base']);
+      if (title) pr.title = title;
+      if (body !== undefined) pr.body = body;
+      if (a.value('-B', '--base')) pr.base = a.value('-B', '--base')!;
+      print(ctx, `${host.webUrl}/pull/${pr.number}`);
+      ctx.world.emit({ type: 'pr-edit', number: pr.number });
+      return 0;
+    }
     case 'close': {
       const pr = findPr(host, ctx, argv[0]);
       pr.state = 'closed';
@@ -285,6 +298,7 @@ async function prCommand(ctx: GitContext, sh: Shell, sub: string, argv: string[]
         '  comment:    Add a comment to a pull request',
         '  create:     Create a pull request',
         '  diff:       View changes in a pull request',
+        '  edit:       Edit a pull request\'s title or body',
         '  list:       List pull requests in a repository',
         '  merge:      Merge a pull request',
         '  reopen:     Reopen a pull request',
@@ -464,7 +478,7 @@ export async function runGh(ctx: GitContext, argv: string[], sh: Shell): Promise
 
 export function GH_COMPLETIONS(words: string[]): string[] {
   if (words.length === 0) return ['pr', 'issue', 'repo', 'auth', 'browse'];
-  if (words[0] === 'pr' && words.length === 1) return ['create', 'list', 'view', 'status', 'checkout', 'diff', 'merge', 'close', 'reopen', 'comment', 'review'];
+  if (words[0] === 'pr' && words.length === 1) return ['create', 'list', 'view', 'status', 'checkout', 'diff', 'edit', 'merge', 'close', 'reopen', 'comment', 'review'];
   if (words[0] === 'issue' && words.length === 1) return ['list', 'view', 'create', 'close', 'reopen', 'comment'];
   if (words[0] === 'repo' && words.length === 1) return ['view', 'clone'];
   if (words[0] === 'pr' && words[1] === 'create') return ['--title', '--body', '--base', '--fill', '--draft'];

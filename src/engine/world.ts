@@ -48,6 +48,8 @@ export class World {
   testRunner: ((repo: Repository) => TestRun) | null = null;
   /** Append-only log of notable things the player did, for the game director. */
   events: WorldEvent[] = [];
+  /** Scratch space for level setup to remember things (e.g. the hash of the bad commit). */
+  data: Record<string, string> = {};
 
   constructor(startTime: number) {
     this.clock = new Clock(startTime);

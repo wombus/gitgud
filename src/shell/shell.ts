@@ -158,7 +158,7 @@ export class Shell {
     const trimmed = line.trim();
     if (!trimmed) return { lines: [], code: 0 };
     this.history.push(trimmed);
-    this.world.emit({ type: 'command', line: trimmed });
+    this.world.emit({ type: 'command', line: trimmed, dir: this.cwd.dir, sub: this.cwd.sub });
 
     let pipelines;
     try {
@@ -435,6 +435,13 @@ const BUILTINS: Record<string, Builtin> = {
       `  ${c.cyan('grep head tail wc')}   search & inspect`,
       `  ${c.cyan('npm test')}             run the test suite (where there is one)`,
       `  ${c.cyan('clear')}                clear the screen (or Ctrl+L)`,
+      '',
+      c.bold('Game commands'),
+      `  ${c.cyan('task')}                 show your current ticket and its checklist`,
+      `  ${c.cyan('hint')}                 get a nudge (noted in your performance review)`,
+      `  ${c.cyan('pingr')}                reprint recent chat messages here`,
+      '',
+      c.gray('Prompt legend: (branch *+%$ ↑1 ↓2)  * unstaged  + staged  % untracked  $ stash  ↑ ahead  ↓ behind'),
     ]),
   clear: () => ({ lines: [], code: 0, clear: true }),
   pwd: (sh) => ok([sh.fs.absPath(sh.cwd)]),
@@ -578,6 +585,8 @@ const BUILTINS: Record<string, Builtin> = {
     }
     return { lines: out, code };
   },
+  less: (sh, args, stdin) => BUILTINS.cat(sh, args, stdin),
+  more: (sh, args, stdin) => BUILTINS.cat(sh, args, stdin),
   head: (sh, args, stdin) => headTail(sh, args, stdin, 'head'),
   tail: (sh, args, stdin) => headTail(sh, args, stdin, 'tail'),
   wc: (sh, args, stdin) => {
