@@ -7,7 +7,8 @@ import type { ConflictEntry, RebaseAction, RebaseStep, Repository } from '../rep
 import { dwimRef, revParseCommit, tryRevParse } from '../revparse';
 import { Args, failure, fatal, GitError, plural } from '../util';
 import { walk } from './history';
-import { recordCommit } from './basic';
+import { cmdCommit, recordCommit } from './basic';
+import { cmdCheckout } from './branching';
 
 /* ------------------------------------------------------------------------- */
 /* Three-way tree merge (the "ort" strategy, minus the heroics)               */
@@ -273,7 +274,6 @@ export async function cmdMerge(ctx: GitContext, argv: string[]): Promise<number>
   }
   if (a.has('--continue')) {
     if (repo.op?.kind !== 'merge') throw fatal('There is no merge in progress (MERGE_HEAD missing).');
-    const { cmdCommit } = await import('./basic');
     return cmdCommit(ctx, []);
   }
   if (a.has('--quit')) {
@@ -821,7 +821,6 @@ export async function cmdRebase(ctx: GitContext, argv: string[]): Promise<number
   // Work out upstream / branch / onto.
   let [upstreamSpec, branchArg] = a.rest;
   if (branchArg) {
-    const { cmdCheckout } = await import('./branching');
     const saved = ctx.out.length;
     cmdCheckout(ctx, [branchArg]);
     ctx.out.length = saved;

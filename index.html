@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>GitGud</title>
+    <meta name="description" content="A first-person junior developer simulator that teaches git one ticket at a time." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=IBM+Plex+Mono:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Sans+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <div id="stage"></div>
+      <div id="flat" hidden></div>
+      <textarea id="kbd" aria-label="Terminal input" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" rows="1"></textarea>
+
+      <!-- In-game HUD -->
+      <div id="hud" hidden>
+        <section id="checklist" class="checklist" aria-live="polite">
+          <button id="checklist-toggle" class="checklist-toggle" aria-expanded="true" aria-controls="checklist-body">
+            <span id="hud-ticket" class="ticket-id"></span>
+            <span id="hud-progress" class="progress"></span>
+            <span id="hud-clock" class="clock"></span>
+          </button>
+          <div id="checklist-body" class="checklist-body">
+          <h2 id="hud-title"></h2>
+          <ul id="hud-objectives"></ul>
+          <p class="checklist-foot">Type <kbd>task</kbd> or <kbd>hint</kbd> in the terminal</p>
+          </div>
+        </section>
+        <nav class="views" aria-label="Look at">
+          <button id="view-terminal" data-view="terminal" title="Look at the terminal (F2)">Terminal</button>
+          <button id="view-chat" data-view="chat" title="Look at Pingr (F2)">Pingr <span id="unread" class="unread" hidden>0</span></button>
+          <button id="view-overview" data-view="overview" title="Lean back (F3)">Lean back</button>
+          <button id="btn-pause" title="Menu (Esc)">Menu</button>
+        </nav>
+        <p id="focus-hint" class="focus-hint" hidden>Click anywhere to resume typing</p>
+      </div>
+
+      <!-- Title -->
+      <section id="title" class="screen title-screen">
+        <div class="title-block">
+          <p class="eyebrow">Conglomo Corp. · Developer Onboarding Program</p>
+          <h1 class="wordmark">GitGud<span class="cursor" aria-hidden="true"></span></h1>
+          <p class="tagline">You are a junior developer. Your manager sends tickets. The repo must survive.</p>
+          <div class="menu" role="menu">
+            <button class="cmd primary" id="btn-start" role="menuitem"><span class="prompt">$</span> <span id="start-label">clock in</span></button>
+            <button class="cmd" id="btn-levels" role="menuitem"><span class="prompt">$</span> ls tickets/</button>
+            <button class="cmd" id="btn-settings" role="menuitem"><span class="prompt">$</span> settings</button>
+          </div>
+          <p class="fineprint">Headphones recommended. A physical keyboard is strongly recommended. Vim is not installed.</p>
+        </div>
+      </section>
+
+      <!-- Ticket queue -->
+      <section id="levels" class="screen panel-screen" hidden>
+        <div class="panel wide">
+          <header class="panel-head">
+            <div>
+              <p class="eyebrow">Sprint 14 · Board: ENG-JUNIOR</p>
+              <h2>Your ticket queue</h2>
+            </div>
+            <button class="ghost" data-close>Back</button>
+          </header>
+          <ol id="level-list" class="tickets"></ol>
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section id="settings" class="screen panel-screen" hidden>
+        <div class="panel">
+          <header class="panel-head">
+            <div>
+              <p class="eyebrow">Workstation preferences</p>
+              <h2>Settings</h2>
+            </div>
+            <button class="ghost" data-close>Done</button>
+          </header>
+          <div class="settings-grid">
+            <label for="set-quality">Graphics</label>
+            <select id="set-quality">
+              <option value="high">High (shadows, AO, bloom)</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+              <option value="flat">Flat 2D (no 3D office)</option>
+            </select>
+            <label for="set-volume">Volume</label>
+            <input id="set-volume" type="range" min="0" max="1" step="0.05" />
+            <label for="set-font">Terminal text</label>
+            <select id="set-font">
+              <option value="0.85">Small</option>
+              <option value="1">Medium</option>
+              <option value="1.15">Large</option>
+            </select>
+            <label for="set-hud">Checklist overlay</label>
+            <input id="set-hud" type="checkbox" />
+            <label for="set-motion">Reduce motion</label>
+            <input id="set-motion" type="checkbox" />
+            <label for="set-mute">Mute</label>
+            <input id="set-mute" type="checkbox" />
+          </div>
+          <div class="danger-zone">
+            <button id="btn-reset" class="ghost danger">Reset progress</button>
+            <span id="reset-confirm" hidden>
+              Erase all progress?
+              <button id="btn-reset-yes" class="ghost danger">Erase</button>
+              <button id="btn-reset-no" class="ghost">Keep</button>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pause -->
+      <section id="pause" class="screen panel-screen" hidden>
+        <div class="panel narrow">
+          <header class="panel-head">
+            <div>
+              <p class="eyebrow" id="pause-ticket"></p>
+              <h2>Paused</h2>
+            </div>
+          </header>
+          <div class="menu">
+            <button class="cmd primary" id="btn-resume"><span class="prompt">$</span> fg</button>
+            <button class="cmd" id="btn-restart"><span class="prompt">$</span> restart ticket</button>
+            <button class="cmd" id="btn-pause-levels"><span class="prompt">$</span> ls tickets/</button>
+            <button class="cmd" id="btn-pause-settings"><span class="prompt">$</span> settings</button>
+            <button class="cmd" id="btn-quit"><span class="prompt">$</span> logout</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Performance review (level complete) -->
+      <section id="review" class="screen paper-screen" hidden>
+        <article class="form review-form">
+          <header class="form-head">
+            <div>
+              <p class="form-org">Conglomo Corp. · Human Resources</p>
+              <h2>Performance Review</h2>
+            </div>
+            <p class="form-no">Form HR-7B<br /><span id="review-date"></span></p>
+          </header>
+          <dl class="form-fields">
+            <div><dt>Employee</dt><dd id="review-employee"></dd></div>
+            <div><dt>Ticket</dt><dd id="review-ticket"></dd></div>
+          </dl>
+          <fieldset class="rating">
+            <legend>Overall rating</legend>
+            <label><span class="box" data-rating="3"></span> Exceeds Expectations</label>
+            <label><span class="box" data-rating="2"></span> Meets Expectations</label>
+            <label><span class="box" data-rating="1"></span> Needs Improvement</label>
+          </fieldset>
+          <div class="stamp" id="review-stamp"></div>
+          <table class="metrics">
+            <tbody id="review-metrics"></tbody>
+          </table>
+          <section class="notes">
+            <h3 id="review-debrief-title"></h3>
+            <ul id="review-debrief"></ul>
+          </section>
+          <footer class="form-actions">
+            <button class="ink primary" id="btn-next">Next ticket</button>
+            <button class="ink" id="btn-replay">Replay</button>
+            <button class="ink" id="btn-review-levels">Ticket queue</button>
+          </footer>
+        </article>
+      </section>
+
+      <!-- Incident report (fail) -->
+      <section id="incident" class="screen paper-screen" hidden>
+        <article class="form incident-form">
+          <header class="form-head">
+            <div>
+              <p class="form-org">Conglomo Corp. · Site Reliability</p>
+              <h2>Incident Report</h2>
+            </div>
+            <p class="form-no">No. <span id="incident-no"></span><br />Copy 2 of 3 (yellow)</p>
+          </header>
+          <div class="stamp red">Incident</div>
+          <dl class="form-fields">
+            <div><dt>Reported by</dt><dd id="incident-from"></dd></div>
+            <div><dt>Ticket</dt><dd id="incident-ticket"></dd></div>
+          </dl>
+          <h3 id="incident-title"></h3>
+          <p id="incident-body" class="incident-body"></p>
+          <p class="corrective"><strong>Corrective action:</strong> Retry the ticket. Try <code>git status</code> before anything irreversible.</p>
+          <footer class="form-actions">
+            <button class="ink primary" id="btn-retry">Try again</button>
+            <button class="ink" id="btn-incident-levels">Ticket queue</button>
+          </footer>
+        </article>
+      </section>
+
+      <div id="curtain" class="curtain" hidden>
+        <p id="curtain-day" class="curtain-day"></p>
+        <p id="curtain-ticket" class="curtain-ticket"></p>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

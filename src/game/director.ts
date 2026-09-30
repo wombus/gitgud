@@ -175,7 +175,8 @@ export class Director {
     return this.opts.callbacks ?? {};
   }
 
-  async start(): Promise<void> {
+  /** Build the level's world. Intro messages start now unless `intro: false` (then call introduce()). */
+  async start(opts: { intro?: boolean } = {}): Promise<void> {
     const lvl = this.level;
     this.world = new World(officeTime(lvl.clock));
     if (lvl.machine) {
@@ -203,7 +204,11 @@ export class Director {
     this.state = 'playing';
     this.startedAt = Date.now();
     this.emitObjectives();
-    this.say(lvl.intro);
+    if (opts.intro !== false) this.introduce();
+  }
+
+  introduce(): void {
+    this.say(this.level.intro);
   }
 
   /** Advance the in-game clock (the UI calls this once per real second). */

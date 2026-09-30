@@ -5,6 +5,7 @@ import type { Repository } from '../repo';
 import { revParseCommit } from '../revparse';
 import { failure, fatal, plural } from '../util';
 import { moveTo } from './branching';
+import { cmdLog } from './history';
 
 /**
  * git bisect: binary search through history for the commit that introduced a bug.
@@ -156,7 +157,6 @@ export async function cmdBisect(ctx: GitContext, argv: string[]): Promise<number
     }
     case 'visualize':
     case 'view': {
-      const { cmdLog } = await import('./history');
       return cmdLog(ctx, ['--oneline', ...candidates(repo)]);
     }
     default:
