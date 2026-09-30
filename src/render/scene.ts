@@ -81,6 +81,7 @@ export class OfficeRenderer {
   private gaze = new THREE.Vector2();
   private gazeTarget = new THREE.Vector2();
   private clock = new THREE.Clock();
+  private raycaster = new THREE.Raycaster();
 
   constructor(
     private container: HTMLElement,
@@ -250,6 +251,22 @@ export class OfficeRenderer {
 
   setFocus(f: Focus): void {
     this.focus = f;
+  }
+
+  /** Which monitor (if any) is under a point in client coordinates. */
+  pickScreen(clientX: number, clientY: number): 'terminal' | 'chat' | null {
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    if (!rect.width || !rect.height) return null;
+    const ndc = new THREE.Vector2(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+    this.raycaster.setFromCamera(ndc, this.camera);
+    const { terminal, chat } = this.office;
+    const hit = this.raycaster.intersectObjects([terminal.group, chat.group], true)[0];
+    if (!hit) return null;
+    for (let o: THREE.Object3D | null = hit.object; o; o = o.parent) {
+      if (o === terminal.group) return 'terminal';
+      if (o === chat.group) return 'chat';
+    }
+    return null;
   }
 
   /** Jump straight to the current pose (used while the screen is black). */

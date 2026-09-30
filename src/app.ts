@@ -147,6 +147,15 @@ export class App {
     }
   }
 
+  /**
+   * Views behave like toggles: choosing the view you're already in takes you back
+   * to the terminal (the "home" view). Shared by the HUD buttons and F2/F3.
+   */
+  private toggleView(v: Focus): void {
+    this.autoChat = false;
+    this.setFocus(v !== 'terminal' && this.currentFocus() === v ? 'terminal' : v);
+  }
+
   private currentFocus(): Focus {
     return this.renderer?.focus ?? 'terminal';
   }
@@ -588,15 +597,9 @@ export class App {
       this.renderer?.pressKey(e.code);
       if (!e.repeat) this.sfx.key(e.code);
       if (this.state !== 'playing') return;
-      if (e.key === 'F2') {
+      if (e.key === 'F2' || e.key === 'F3') {
         e.preventDefault();
-        this.autoChat = false;
-        this.setFocus(this.currentFocus() === 'chat' ? 'terminal' : 'chat');
-        return;
-      }
-      if (e.key === 'F3') {
-        e.preventDefault();
-        this.setFocus(this.currentFocus() === 'overview' ? 'terminal' : 'overview');
+        this.toggleView(e.key === 'F2' ? 'chat' : 'overview');
         return;
       }
       const ed = this.term.editor;
@@ -644,6 +647,12 @@ export class App {
       const target = e.target as HTMLElement;
       if (this.state === 'playing' && !target.closest('button, select, input, a')) {
         e.preventDefault();
+        // Clicking a monitor looks at it (e.g. to get back from "Lean back").
+        const screen = this.renderer?.pickScreen(e.clientX, e.clientY);
+        if (screen && screen !== this.currentFocus()) {
+          this.autoChat = false;
+          this.setFocus(screen);
+        }
         this.focusKeyboard();
       }
     });
@@ -721,8 +730,7 @@ export class App {
     });
     for (const v of ['terminal', 'chat', 'overview'] as Focus[]) {
       on(`view-${v}`, () => {
-        this.autoChat = false;
-        this.setFocus(v);
+        this.toggleView(v);
         this.focusKeyboard();
       });
     }
