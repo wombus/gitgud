@@ -98,6 +98,23 @@ async function main() {
     await page.screenshot({ path: `${out}/graph.png` });
   }
 
+  if (want('readme')) {
+    const shot = (name: string) => page.screenshot({ path: `${out}/${name}.jpg`, type: 'jpeg', quality: 82 });
+    await shot('title');
+    await level(page, 4);
+    await run(page, ['git fetch', 'git merge origin/main', 'git status']);
+    await page.waitForTimeout(600);
+    await shot('terminal');
+    await focus(page, 'overview');
+    await shot('office');
+    await focus(page, 'chat');
+    await shot('chat');
+    await focus(page, 'terminal');
+    await level(page, 1);
+    await run(page, ['git status', 'git add index.html', 'git commit -m "Fix typo in homepage heading"']);
+    await page.waitForTimeout(16000);
+    await shot('review');
+  }
   if (want('menus')) {
     await page.evaluate(() => (document.getElementById('btn-levels') as HTMLButtonElement).click());
     await page.waitForTimeout(800);

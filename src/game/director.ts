@@ -377,6 +377,8 @@ export class Director {
       rating,
       stars,
     };
+    // Finished before everyone was done talking? Skip the now-stale chatter.
+    this.queue = [];
     this.say(this.level.outro);
   }
 

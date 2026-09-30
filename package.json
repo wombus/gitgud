@@ -7,11 +7,15 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:artifact": "vite build && node scripts/build-artifact.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "npm run typecheck && npm test"
+    "check": "npm run typecheck && npm test",
+    "crosscheck": "tsx scripts/crosscheck.ts",
+    "smoke": "vite build && tsx scripts/smoke.ts screenshots",
+    "shots": "vite build && tsx scripts/shots.ts screenshots"
   },
   "dependencies": {
     "three": "^0.186.1"

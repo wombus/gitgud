@@ -683,7 +683,6 @@ code {
   text-transform: uppercase;
   transform: rotate(-8deg);
   opacity: 0.85;
-  mix-blend-mode: multiply;
   animation: stamp 0.35s 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
 }
 .stamp.red {
